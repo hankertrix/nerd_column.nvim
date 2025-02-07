@@ -233,15 +233,21 @@ local function match_file_type(given_file_type, list_of_file_types)
 	return false
 end
 
+-- The function to disable the colour column
+---@param window integer The ID of the window in the buffer
+---@return nil
+local function disable_colour_column(window) vim.wo[window].colorcolumn = "" end
+
 -- The function to call every time the buffer is updated
 local function on_update()
 	--
 
-	-- If the plugin is disabled, exit the function
-	if not config.enabled then return end
-
 	-- Get the current window
 	local current_window = vim.api.nvim_get_current_win()
+
+	-- If the plugin is disabled, disable the colour column
+	-- and exit the function
+	if not config.enabled then return disable_colour_column(current_window) end
 
 	-- Get the current buffer
 	local current_buffer = vim.api.nvim_win_get_buf(current_window)
@@ -253,12 +259,12 @@ local function on_update()
 
 	-- If the file type of the buffer is empty,
 	-- or is in the disabled file types,
-	-- exit the function
+	-- disable the colour column and exit the function
 	if
 		file_type == ""
 		or match_file_type(file_type, config.disabled_file_types)
 	then
-		return
+		return disable_colour_column(current_window)
 	end
 
 	-- Initialise the colour columns
