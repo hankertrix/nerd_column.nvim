@@ -24,7 +24,7 @@ when it is not needed.
 ```lua
 {
     "hankertrix/nerd_column.nvim",
-    event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+    event = { "BufEnter" },
     opts = {}
 }
 ```
