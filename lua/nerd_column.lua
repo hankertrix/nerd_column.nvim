@@ -325,6 +325,10 @@ local function on_update()
 	-- then set the exceeded state
 	if exceeded ~= vim.b[current_buffer].nerd_column_has_exceeded then
 		vim.b[current_buffer].nerd_column_has_exceeded = exceeded
+
+	-- Otherwise, exit the function
+	else
+		return
 	end
 
 	-- If the line length has exceeded the colour column
