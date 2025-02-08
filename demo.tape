@@ -53,7 +53,9 @@ Type "The colour column is currently set to `80`, which you can "
 Type "see by using the `:set colorcolumn?` command."
 Escape
 Sleep 1s
-Type ":set colorcolumn?" Enter
+Type ":set colorcolumn?"
+Sleep 500ms
+Enter
 Sleep 1s
 Type "A" Enter 2
 Type "Now let's delete some text and watch the colour column disappear!"
@@ -79,7 +81,7 @@ Sleep 1s
 Type "G"
 Type "A" Enter 2
 Type "The colour column disappeared, as none of the lines exceeded "
-Type "the line length of 80, except for this one that is being typed."
+Type "the line length of `80`, except for this one that is being typed."
 Sleep 1s
 Enter 2
 Type "Nerd Column also provides a few commands that you can use to enable "
