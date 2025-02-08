@@ -264,7 +264,7 @@ Nerd Column provides 3 commands:
 
 This plugin is licenced under the [GNU AGPL v3 licence][Licence].
 
-[video-demo]: https://github.com/user-attachments/assets/77ec73a1-13b2-444f-a476-d28ffbc8ccd4
+[video-demo]: https://github.com/user-attachments/assets/65141c11-eee6-482b-8e09-b139cf48c831
 [smartcolumn.nvim]: https://github.com/m4xshen/smartcolumn.nvim
 [lazy.nvim]: https://github.com/folke/lazy.nvim
 [packer.nvim]: https://github.com/wbthomason/packer.nvim
