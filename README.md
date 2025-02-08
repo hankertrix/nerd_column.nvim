@@ -8,10 +8,17 @@ when it is not needed.
 
 ## Table of contents
 
+- [Video Demonstration](#video-demonstration)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Commands](#commands)
+
+## Video demonstration
+
+Below is a video demonstration of the plugin in action.
+
+[video-demo]
 
 ## Requirements
 
@@ -257,6 +264,7 @@ Nerd Column provides 3 commands:
 
 This plugin is licenced under the [GNU AGPL v3 licence][Licence].
 
+[video-demo]: placeholder
 [smartcolumn.nvim]: https://github.com/m4xshen/smartcolumn.nvim
 [lazy.nvim]: https://github.com/folke/lazy.nvim
 [packer.nvim]: https://github.com/wbthomason/packer.nvim
