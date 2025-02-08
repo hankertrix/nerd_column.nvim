@@ -108,16 +108,6 @@ M.default_config = {
 ---@type NerdColumn.ResolvedConfig
 local config = M.default_config
 
--- The function to enable the plugin
----@type fun(): nil
-M.enable = function() config.enabled = true end
-
--- The function to disable the plugin
-M.disable = function() config.enabled = false end
-
--- The function to toggle the plugin
-M.toggle = function() config.enabled = not config.enabled end
-
 -- The function to check whether the lines in the scope
 -- has exceeded the colour columns
 ---@param window integer The ID of the window in the buffer
@@ -239,7 +229,7 @@ end
 local function disable_colour_column(window) vim.wo[window].colorcolumn = "" end
 
 -- The function to call every time the buffer is updated
-local function on_update()
+local function on_change()
 	--
 
 	-- Get the current window
@@ -327,16 +317,6 @@ local function on_update()
 		minimum_colour_column
 	)
 
-	-- If the exceeded state is not the same as the previous state,
-	-- then set the exceeded state
-	if exceeded ~= vim.b[current_buffer].nerd_column_has_exceeded then
-		vim.b[current_buffer].nerd_column_has_exceeded = exceeded
-
-	-- Otherwise, exit the function
-	else
-		return
-	end
-
 	-- If the line length has exceeded the colour column
 	if exceeded then
 		--
@@ -364,6 +344,40 @@ local function on_update()
 	else
 		vim.wo[current_window].colorcolumn = ""
 	end
+end
+
+-- The function to enable the plugin
+---@type fun(): nil
+M.enable = function()
+	--
+
+	-- Enable the plugin
+	config.enabled = true
+
+	-- Call the on change function
+	on_change()
+end
+
+-- The function to disable the plugin
+M.disable = function()
+	--
+
+	-- Disable the plugin
+	config.enabled = false
+
+	-- Disable the colour column
+	disable_colour_column(vim.api.nvim_get_current_win())
+end
+
+-- The function to toggle the plugin
+M.toggle = function()
+	--
+
+	-- Toggle the plugin
+	config.enabled = not config.enabled
+
+	-- Call the on change function
+	on_change()
 end
 
 -- The function to set up the plugin
@@ -454,7 +468,7 @@ M.setup = function(user_config)
 		{ "BufEnter", "CursorMoved", "CursorMovedI", "WinScrolled" },
 		{
 			group = vim.api.nvim_create_augroup("NerdColumn", { clear = true }),
-			callback = on_update,
+			callback = on_change,
 		}
 	)
 end
