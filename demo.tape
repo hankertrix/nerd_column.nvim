@@ -38,8 +38,9 @@ Set TypingSpeed 150ms
 Show
 Type "i"
 Sleep 250ms
-Type "Hi there!" Enter 2
+Type "Hi there!"
 Sleep 1s
+Enter 2
 Type "Welcome to the demonstration for Nerd Column!"
 Sleep 1s
 Enter 2
