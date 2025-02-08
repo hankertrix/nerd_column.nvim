@@ -29,3 +29,5 @@ smartcolumn
 noice
 pckr
 hankertrix
+Bluloco
+Caskaydia
