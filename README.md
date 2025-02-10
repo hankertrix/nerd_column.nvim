@@ -162,6 +162,44 @@ For example:
 maximum_line_count = 40000
 ```
 
+### `transform_colour_column`
+
+The `transform_colour_column` option is a function that transforms the
+colour column before it is actually displayed, allowing you to trigger
+the colour column display on a certain line length, but display the
+colour column at a different column from the colour column that triggered
+the display of the colour column.
+
+For example, if you would like to have the colour column be displayed when
+the line length is past `80`, but you want the colour column to show up at
+column `81`, you can use the function below to achieve that:
+
+```lua
+---@type NerdColumn.TransformColourColumn
+transform_colour_column = function(colour_column)
+    return colour_column + 1
+end
+```
+
+The `transform_colour_column` function receives the colour column as a
+parameter which is either an integer or a list of integers, and should
+return the modified colour column, which can an integer, a string, a list
+of integers, or a list of strings.
+
+If you have colour columns in your configuration which are tables,
+make sure you handle them in the `transform_colour_column` function,
+like shown below, or you will break the plugin.
+
+```lua
+---@type NerdColumn.TransformColourColumn
+transform_colour_column = function(colour_column)
+    if type(colour_column) == "table" then
+        return vim.tbl_map(function(item) return item + 1 end, colour_column)
+    end
+    return colour_column + 1
+end
+```
+
 ### `disabled_file_types`
 
 The `disabled_file_types` are the file types to disable the plugin for.

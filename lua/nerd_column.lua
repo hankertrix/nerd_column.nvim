@@ -29,6 +29,16 @@
 --- |NerdColumn.ResolvedColourColumnFunction
 ---	|table<string, NerdColumn.ResolvedColourColumn>
 
+-- The type of the transform colour column function
+---@alias NerdColumn.TransformColourColumn fun(
+---	colour_column: NerdColumn.ResolvedColourColumn,
+---): NerdColumn.ColourColumn
+
+-- The type of the transform colour column function when resolved
+---@alias NerdColumn.ResolvedTransformColourColumn fun(
+---	colour_column_width: NerdColumn.ResolvedColourColumn,
+---): NerdColumn.ResolvedColourColumn
+
 -- Type definitions
 
 -- The type of the configuration
@@ -37,14 +47,16 @@
 ---@field custom_colour_column NerdColumn.CustomColourColumn
 ---@field scope NerdColumn.Scope The scope to act on
 ---@field respect_editor_config boolean Whether to respect the editor config
----@field maximum_line_count integer The maximum number of lines to check
 ---@field enabled boolean Whether the plugin is enabled or not
+---@field maximum_line_count integer The maximum number of lines to check
+---@field transform_colour_column NerdColumn.TransformColourColumn
 ---@field disabled_file_types string[] The list of disabled file types
 
 -- The type of the resolved configuration
 ---@class (exact) NerdColumn.ResolvedConfig: NerdColumn.Config
 ---@field colour_column NerdColumn.ResolvedColourColumn
 ---@field custom_colour_column NerdColumn.ResolvedCustomColourColumn
+---@field transform_colour_column NerdColumn.ResolvedTransformColourColumn
 
 -- The module table
 ---@class NerdColumn
@@ -69,13 +81,14 @@ M.default_config = {
 	respect_editor_config = true,
 	enabled = true,
 	maximum_line_count = 40000,
+	transform_colour_column = function(colour_column) return colour_column end,
 	disabled_file_types = {
 		"help",
 		"checkhealth",
 		"netrw",
 		"qf",
 
-		-- Plugin specific filetypes
+		-- Plugin specific file types
 		"packer",
 		"dirvish",
 		"dirbuf",
@@ -321,6 +334,9 @@ local function on_change()
 	if exceeded then
 		--
 
+		-- Transform the colour columns with the function to transform them
+		colour_columns = config.transform_colour_column(colour_columns)
+
 		-- If the colour column is a table,
 		-- iterate over all the columns,
 		-- convert them to a string
@@ -344,6 +360,90 @@ local function on_change()
 	else
 		vim.wo[current_window].colorcolumn = ""
 	end
+end
+
+-- The function to resolve a string in the user's configuration.
+--
+-- It essentially just converts a string to an integer.
+---@param colour_column string|integer The colour column
+---@param default_value integer|integer[] Default value if the conversion fails
+---@return NerdColumn.ResolvedColourColumn resolved_colour_column
+local function resolve_string(colour_column, default_value)
+	return tonumber(colour_column) or default_value
+end
+
+-- The function to resolve a table in the user's configuration.
+--
+-- It essentially just converts a table of strings to a table
+-- of integers.
+---@param colour_column_table string[]|integer[] The list of colour columns
+---@param default_value integer The default value if the conversion fails
+---@return integer[] resolved_colour_column The resolved colour column
+local function resolve_table(colour_column_table, default_value)
+	return vim.tbl_map(
+		function(item) return resolve_string(item, default_value) end,
+		colour_column_table
+	)
+end
+
+-- The function to resolve a function in the user's configuration.
+--
+-- It essentially just converts the output of the function
+-- into an integer or a table of integers, depending on what the output was
+---@param colour_column_func fun(...): NerdColumn.ColourColumn
+---@param default_value integer|integer[] Default value if the conversion fails
+---@param table_default_value integer Default value for the table
+---@return fun(...): NerdColumn.ResolvedColourColumn
+local function resolve_function(
+	colour_column_func,
+	default_value,
+	table_default_value
+)
+	--
+
+	-- If the default value is a number
+	if type(default_value) == "number" then
+		--
+
+		-- Set the table default value to it
+		table_default_value = default_value
+	end
+
+	-- Return a new function
+	---@param ... any
+	return function(...)
+		--
+
+		-- Get the colour column from the function
+		local colour_column = colour_column_func(...)
+
+		-- If the type of the colour column is a table,
+		-- return the resolved table
+		if type(colour_column) == "table" then
+			return resolve_table(colour_column, table_default_value)
+		end
+
+		-- Otherwise, the colour column is a string,
+		-- so resolve it and return the result
+		return resolve_string(colour_column, default_value)
+	end
+end
+
+-- Function to get the user's default colour column
+---@param default_colour_column integer The default colour column
+---@param user_colour_column NerdColumn.ResolvedColourColumn
+---@return integer colour_column The new default colour column
+local function get_default_colour_column(
+	default_colour_column,
+	user_colour_column
+)
+	--
+
+	-- If the user colour column is a number, return it
+	if type(user_colour_column) == "number" then return user_colour_column end
+
+	-- Otherwise, return the default colour column
+	return default_colour_column
 end
 
 -- The function to enable the plugin
@@ -391,6 +491,10 @@ M.setup = function(user_config)
 	-- Get the default colour column
 	local default_colour_column = M.default_config.colour_column
 
+	-- Cast the default colour column to an integer,
+	-- since the default is just an integer
+	---@cast default_colour_column integer
+
 	-- Get the user's colour column
 	---@type NerdColumn.ColourColumn
 	local user_colour_column = user_config.colour_column
@@ -400,11 +504,9 @@ M.setup = function(user_config)
 	if type(user_colour_column) == "table" then
 		--
 
-		-- Iterate over all the items in the table and
-		-- convert it to an integer
-		for index, item in ipairs(user_colour_column) do
-			user_colour_column[index] = tonumber(item)
-		end
+		-- Resolve the table
+		user_colour_column =
+			resolve_table(user_colour_column, default_colour_column)
 
 	-- Otherwise, if it is a string, convert the colour column to an integer
 	elseif type(user_colour_column) == "string" then
@@ -412,25 +514,25 @@ M.setup = function(user_config)
 			or default_colour_column
 	end
 
+	-- Get the user's default colour column
+	default_colour_column =
+		get_default_colour_column(default_colour_column, user_colour_column)
+
 	-- Get the user's custom colour column
 	---@type NerdColumn.CustomColourColumn
-	local user_custom_colour_column = user_config.custom_colour_column or {}
+	local user_custom_colour_column = user_config.custom_colour_column
+		or M.default_config.custom_colour_column
 
 	-- If the custom colour column is a function
 	if type(user_custom_colour_column) == "function" then
 		--
 
-		-- Save the user's custom colour column function
-		local user_custom_colour_column_func = user_custom_colour_column
-
-		-- Change the output of the function to an integer,
-		-- defaulting to the user's configured colour column if it fails
-		---@type NerdColumn.ResolvedCustomColourColumn
-		user_custom_colour_column = function(window, buffer, file_type)
-			return tonumber(
-				user_custom_colour_column_func(window, buffer, file_type)
-			) or user_colour_column
-		end
+		-- Resolve the function
+		user_custom_colour_column = resolve_function(
+			user_custom_colour_column,
+			user_colour_column,
+			default_colour_column
+		)
 
 	-- Otherwise, if the custom colour column is a table
 	elseif type(user_custom_colour_column) == "table" then
@@ -441,20 +543,30 @@ M.setup = function(user_config)
 			--
 
 			-- If the colour column is a table,
-			-- convert all the values into an integer
+			-- resolve the table
 			if type(colour_column) == "table" then
-				for index, item in ipairs(colour_column) do
-					colour_column[index] = tonumber(item)
-				end
+				user_custom_colour_column[file_type] =
+					resolve_table(colour_column, default_colour_column)
 
 			-- Otherwise, convert the colour column into an integer,
 			-- defaulting to the user's configured colour column if it fails
 			else
-				user_custom_colour_column[file_type] = tonumber(colour_column)
-					or user_colour_column
+				user_custom_colour_column[file_type] =
+					resolve_string(colour_column, user_colour_column)
 			end
 		end
 	end
+
+	-- Get the function to transform the colour column
+	local user_transform_colour_column = user_config.transform_colour_column
+		or M.default_config.transform_colour_column
+
+	-- Resolve the function
+	user_transform_colour_column = resolve_function(
+		user_transform_colour_column,
+		user_colour_column,
+		default_colour_column
+	)
 
 	-- Set the user configuration to the resolved ones
 	user_config.colour_column = user_colour_column
