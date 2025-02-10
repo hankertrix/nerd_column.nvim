@@ -226,13 +226,14 @@ local default_config = {
     respect_editor_config = true,
     enabled = true,
     maximum_line_count = 40000,
+    transform_colour_column = function(colour_column) return colour_column end,
     disabled_file_types = {
         "help",
         "checkhealth",
         "netrw",
         "qf",
 
-        -- Plugin specific filetypes
+        -- Plugin specific file types
         "packer",
         "dirvish",
         "dirbuf",
