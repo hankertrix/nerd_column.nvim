@@ -571,6 +571,7 @@ M.setup = function(user_config)
 	-- Set the user configuration to the resolved ones
 	user_config.colour_column = user_colour_column
 	user_config.custom_colour_column = user_custom_colour_column
+	user_config.transform_colour_column = user_transform_colour_column
 
 	-- Merge the user's configuration with the default configuration
 	config = vim.tbl_extend("force", config, user_config)
