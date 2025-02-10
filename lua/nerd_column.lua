@@ -558,6 +558,7 @@ M.setup = function(user_config)
 	end
 
 	-- Get the function to transform the colour column
+	---@type NerdColumn.TransformColourColumn
 	local user_transform_colour_column = user_config.transform_colour_column
 		or M.default_config.transform_colour_column
 
