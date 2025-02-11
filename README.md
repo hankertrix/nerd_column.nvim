@@ -70,26 +70,23 @@ require("nerd_column").setup()
 
 ### `colour_column`
 
-The `colour_column` can be an integer, a list of integers, a string,
-or a list of strings.
+The `colour_column` can be an integer or a list of integers.
 
 For example:
 
 ```lua
 ---@type NerdColumn.ColourColumn
 colour_column = 80
-colour_column = "120"
 colour_column = { 80, 120 }
-colour_column = { "100", "140" }
 ```
 
 ### `custom_colour_column`
 
 The `custom_colour_column` can either be table of file types mapped to
-an integer, a string, a list of integers, or a list of strings.
+an integer or a list of integers.
 It can also be a function that takes an integer representing the buffer ID,
 an integer representing the window ID, and a string representing the file type,
-and returns an integer or a string.
+and returns an integer or a list of integers.
 
 For example:
 
@@ -97,11 +94,11 @@ For example:
 ---@type NerdColumn.CustomColourColumn
 custom_colour_column = {
     lua = { 80, 120 },
-    markdown = "100",
+    markdown = 100,
 }
 
 custom_colour_column = function(buffer, window, file_type)
-    return "120"
+    return 120
 end
 ```
 
@@ -181,14 +178,13 @@ transform_colour_column = function(colour_column)
 end
 ```
 
-The `transform_colour_column` function receives the colour column as a
-parameter which is either an integer or a list of integers, and should
-return the modified colour column, which can an integer, a string, a list
-of integers, or a list of strings.
+The `transform_colour_column` function receives the colour column as an
+argument which is either an integer or a list of integers, and returns
+the modified colour column, which is either an integer or a list of integers.
 
-If you have colour columns in your configuration which are tables,
-make sure you handle them in the `transform_colour_column` function,
-like shown below, or you will break the plugin.
+If you have multiple colour columns in your configuration, i.e. a list of
+colour columns, make sure you handle them in the `transform_colour_column`
+function, like shown below, or you will break the plugin.
 
 ```lua
 ---@type NerdColumn.TransformColourColumn
