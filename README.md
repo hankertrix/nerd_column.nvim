@@ -214,7 +214,7 @@ disabled_file_types = { "help", "checkhealth", "netrw", "qf" }
 The default configuration for the plugin is as follows:
 
 ```lua
----@type NerdColumn.ResolvedConfig
+---@type NerdColumn.Config
 local default_config = {
     colour_column = 80,
     custom_colour_column = {},
