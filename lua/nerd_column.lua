@@ -217,6 +217,35 @@ local function match_file_type(given_file_type, list_of_file_types)
 	return false
 end
 
+-- The function to get whether the plugin is enabled or not
+---@return boolean nerd_column_is_enabled Whether the plugin is enabled or not
+local function nerd_column_is_enabled()
+	--
+
+	-- Get the value of buffer local variable for
+	-- whether the plugin is enabled
+	local plugin_enabled = vim.b.nerd_column_enabled
+
+	-- If the buffer local variable isn't set,
+	-- then get the value of the global variable
+	if plugin_enabled == nil then plugin_enabled = vim.g.nerd_column_enabled end
+
+	-- Return whether the plugin is enabled or not
+	return plugin_enabled
+end
+
+-- The function to set the plugin state
+---@param state boolean
+---@return nil
+local function set_nerd_column_state(state)
+	--
+
+	-- Set the plugin state in both the global variable
+	-- and the buffer local variable
+	vim.g.nerd_column_enabled = state
+	vim.b.nerd_column_enabled = state
+end
+
 -- The function to disable the colour column
 ---@param window integer The ID of the window in the buffer
 ---@return nil
@@ -231,7 +260,9 @@ local function on_change()
 
 	-- If the plugin is disabled, disable the colour column
 	-- and exit the function
-	if not config.enabled then return disable_colour_column(current_window) end
+	if not nerd_column_is_enabled() then
+		return disable_colour_column(current_window)
+	end
 
 	-- Get the current buffer
 	local current_buffer = vim.api.nvim_win_get_buf(current_window)
@@ -349,7 +380,7 @@ M.enable = function()
 	--
 
 	-- Enable the plugin
-	config.enabled = true
+	set_nerd_column_state(true)
 
 	-- Call the on change function
 	on_change()
@@ -360,7 +391,7 @@ M.disable = function()
 	--
 
 	-- Disable the plugin
-	config.enabled = false
+	set_nerd_column_state(false)
 
 	-- Disable the colour column
 	disable_colour_column(vim.api.nvim_get_current_win())
@@ -370,8 +401,11 @@ end
 M.toggle = function()
 	--
 
+	-- Get the current state of the plugin
+	local is_enabled = nerd_column_is_enabled()
+
 	-- Toggle the plugin
-	config.enabled = not config.enabled
+	set_nerd_column_state(not is_enabled)
 
 	-- Call the on change function
 	on_change()
@@ -387,6 +421,10 @@ M.setup = function(user_config)
 
 	-- Merge the user's configuration with the default configuration
 	config = vim.tbl_extend("force", config, user_config)
+
+	-- If the plugin is enabled, set the vim global option
+	-- for the plugin to enabled
+	if config.enabled then vim.g.nerd_column_enabled = true end
 
 	-- Create the auto command to set the colour column
 	vim.api.nvim_create_autocmd(

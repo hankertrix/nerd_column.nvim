@@ -8,11 +8,13 @@ when it is not needed.
 
 ## Table of contents
 
-- [Video Demonstration](#video-demonstration)
+- [Video demonstration](#video-demonstration)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Buffer-specific toggle](#buffer-specific-toggle)
 - [Commands](#commands)
+- [Licence](#licence)
 
 ## Video demonstration
 
@@ -273,6 +275,23 @@ you can use the following snippet to access it.
 require("nerd_column").default_config
 ```
 
+## Buffer-specific toggle
+
+You can control the state of the plugin via the use of the global option
+`vim.g.nerd_column_enabled` and the buffer-local option
+`vim.b.nerd_column_enabled`. If you have set the plugin to be enabled
+by default by setting `enabled` to `true` in your configuration, the global
+option `vim.g.nerd_column_enabled` will be automatically set to `true`
+when the plugin is set up.
+
+The value of the buffer-local option `vim.b.nerd_column_enabled` is checked
+first, and if it is not set, i.e. `vim.b.nerd_column_enabled` is `nil`,
+then the value of the global option `vim.g.nerd_column_enabled`
+will be used instead.
+
+This way, you can disable the plugin in specific buffers by setting
+`vim.b.nerd_column_enabled` to `false`.
+
 ## Commands
 
 Nerd Column provides 3 commands:
@@ -284,6 +303,10 @@ Nerd Column provides 3 commands:
   require("nerd_column").enable()
   ```
 
+  This command will set both `vim.g.nerd_column_enabled` and
+  `vim.b.nerd_column_enabled` to `true`, as most users would
+  expect the command to work globally.
+
 - `NerdColumnDisable` to disable the plugin.
   It can also be accessed from Lua be using:
 
@@ -291,12 +314,26 @@ Nerd Column provides 3 commands:
   require("nerd_column").disable()
   ```
 
+  This command will set both `vim.g.nerd_column_enabled` and
+  `vim.b.nerd_column_enabled` to `false`, as most users would
+  expect the command to work globally.
+
 - `NerdColumnToggle` to toggle the plugin.
   It can also be accessed from Lua be using:
 
   ```lua
   require("nerd_column").toggle()
   ```
+
+  This command will get the current state of the plugin from
+  `vim.b.nerd_column_enabled` first. If `vim.b.nerd_column_enabled`
+  is not set, i.e. `vim.b.nerd_column_enabled` is `nil`, then
+  it will take the value of `vim.g.nerd_column_enabled`.
+  Then, the command will toggle the plugin state, and set both
+  `vim.g.nerd_column_enabled` and `vim.b.nerd_column_enabled` to the
+  toggled state. The reason for this is that most users would expect
+  the command to work globally, and that the toggle should act on
+  the current state of the plugin in the current buffer.
 
 ## [Licence]
 
