@@ -84,7 +84,7 @@ colour_column = { 80, 120 }
 
 ### `custom_colour_column`
 
-The `custom_colour_column` can either be table of file types mapped to
+The `custom_colour_column` can either be a table of file types mapped to
 an integer or a list of integers.
 It can also be a function that takes an integer representing the buffer ID,
 an integer representing the window ID, and a string representing the file type,
@@ -108,7 +108,7 @@ end
 
 The `scope` option refers to the scope within which to check whether
 the lines have exceeded the colour column configuration.
-It can be either be `file`, `window`, or `line`.
+It can be either `file`, `window`, or `line`.
 
 - `file` refers to the entire file.
 - `window` refers to the visible part of the current window.
@@ -151,7 +151,7 @@ enabled = true
 
 The `maximum_line_count` option sets the maximum number of lines the plugin
 will check. When a file has more lines than the `maximum_line_count`, the
-plugin will automatically change to scope to `window` so that Neovim doesn't
+plugin will automatically change the scope to `window` so that Neovim doesn't
 become unbearably slow and laggy to use.
 
 For example:
@@ -200,7 +200,8 @@ end
 
 ### `disabled_file_types`
 
-The `disabled_file_types` are the file types to disable the plugin for.
+The `disabled_file_types` option is a list of file types in which the
+plugin should be disabled. It is a list of strings.
 You can use `*` at the end of a file type to match a file type prefix,
 like `Neogit*`.
 
