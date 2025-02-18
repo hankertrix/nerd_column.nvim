@@ -231,6 +231,7 @@ local default_config = {
         "checkhealth",
         "netrw",
         "qf",
+        "man",
 
         -- Plugin specific file types
         "packer",
