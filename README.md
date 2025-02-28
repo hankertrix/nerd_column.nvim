@@ -310,7 +310,7 @@ Nerd Column provides 3 commands:
   expect the command to work globally.
 
 - `NerdColumnDisable` to disable the plugin.
-  It can also be accessed from Lua be using:
+  It can also be accessed from Lua by using:
 
   ```lua
   require("nerd_column").disable()
@@ -321,7 +321,7 @@ Nerd Column provides 3 commands:
   expect the command to work globally.
 
 - `NerdColumnToggle` to toggle the plugin.
-  It can also be accessed from Lua be using:
+  It can also be accessed from Lua by using:
 
   ```lua
   require("nerd_column").toggle()
@@ -331,7 +331,7 @@ Nerd Column provides 3 commands:
   `vim.b.nerd_column_enabled` first. If `vim.b.nerd_column_enabled`
   is not set, i.e. `vim.b.nerd_column_enabled` is `nil`, then
   it will take the value of `vim.g.nerd_column_enabled`.
-  Then, the command will toggle the plugin state, and set both
+  Then, the command will toggle the plugin state and set both
   `vim.g.nerd_column_enabled` and `vim.b.nerd_column_enabled` to the
   toggled state. The reason for this is that most users would expect
   the command to work globally, and that the toggle should act on
@@ -341,7 +341,7 @@ Nerd Column provides 3 commands:
 
 This plugin is licenced under the [GNU AGPL v3 licence][Licence].
 
-[video-demo]: https://github.com/user-attachments/assets/65141c11-eee6-482b-8e09-b139cf48c831
+[video-demo]: https://github.com/user-attachments/assets/66a739ac-d3ba-43dc-b95b-a3778dcbd330
 [smartcolumn.nvim]: https://github.com/m4xshen/smartcolumn.nvim
 [lazy.nvim]: https://github.com/folke/lazy.nvim
 [packer.nvim]: https://github.com/wbthomason/packer.nvim
