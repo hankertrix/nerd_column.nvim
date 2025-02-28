@@ -8,7 +8,7 @@ Require nvim
 
 # Settings for the demo
 Set FontSize 20
-Set FontFamily "CaskaydiaCove NFM"
+Set FontFamily "Maple Mono NF CN"
 Set Theme "BlulocoDark"
 Set Padding 20
 Set Margin 0
