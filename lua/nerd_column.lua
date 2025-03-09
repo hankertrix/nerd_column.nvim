@@ -147,8 +147,8 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 	elseif scope == "window" then
 		--
 
-		-- Get the line range for the current window
-		-- being shown to the user
+		-- Get the line range for the visible region
+		-- of the window being shown
 		lines = vim.api.nvim_buf_get_lines(
 			buffer,
 			vim.fn.line("w0", window) - 1,
@@ -369,9 +369,9 @@ local function on_change()
 			vim.wo[current_window].colorcolumn = tostring(colour_columns)
 		end
 
-	-- Otherwise, set the colour column to an empty string
+	-- Otherwise, disable the colour column
 	else
-		vim.wo[current_window].colorcolumn = ""
+		disable_colour_column(current_window)
 	end
 end
 
