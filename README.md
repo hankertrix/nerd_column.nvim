@@ -147,6 +147,18 @@ For example:
 enabled = true
 ```
 
+### `always_show`
+
+The `always_show` option sets whether the plugin should
+always show the colour column.
+
+For example:
+
+```lua
+---@type boolean
+always_show = true
+```
+
 ### `maximum_line_count`
 
 The `maximum_line_count` option sets the maximum number of lines the plugin
@@ -224,6 +236,7 @@ local default_config = {
     scope = "file",
     respect_editor_config = true,
     enabled = true,
+    always_show = false,
     maximum_line_count = 40000,
     transform_colour_column = function(colour_column) return colour_column end,
     disabled_file_types = {

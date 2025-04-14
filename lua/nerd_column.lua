@@ -33,6 +33,7 @@
 ---@field scope NerdColumn.Scope The scope to act on
 ---@field respect_editor_config boolean Whether to respect the editor config
 ---@field enabled boolean Whether the plugin is enabled or not
+---@field always_show boolean Always show the colour column or not
 ---@field maximum_line_count integer The maximum number of lines to check
 ---@field transform_colour_column NerdColumn.TransformColourColumn
 ---@field disabled_file_types string[] The list of disabled file types
@@ -58,6 +59,7 @@ M.default_config = {
 	scope = M.Scope.File,
 	respect_editor_config = true,
 	enabled = true,
+	always_show = false,
 	maximum_line_count = 40000,
 	transform_colour_column = function(colour_column) return colour_column end,
 	disabled_file_types = {
@@ -252,6 +254,36 @@ end
 ---@return nil
 local function disable_colour_column(window) vim.wo[window].colorcolumn = "" end
 
+-- The function to show the colour columns
+---@param colour_columns integer|integer[]
+---@param window integer
+---@return nil
+local function show_colour_columns(colour_columns, window)
+	--
+
+	-- Transform the colour columns with the function to transform them
+	colour_columns = config.transform_colour_column(colour_columns)
+
+	-- If the colour column is a table,
+	-- iterate over all the columns,
+	-- convert them to a string
+	-- and join them with a comma,
+	-- and set the colour column to the result
+	if type(colour_columns) == "table" then
+		vim.wo[window].colorcolumn = table.concat(
+			vim.tbl_map(
+				function(column) return tostring(column) end,
+				colour_columns
+			),
+			","
+		)
+
+	-- Otherwise, set the colour column to given colour column as a string
+	else
+		vim.wo[window].colorcolumn = tostring(colour_columns)
+	end
+end
+
 -- The function to call every time the buffer is updated
 local function on_change()
 	--
@@ -336,6 +368,12 @@ local function on_change()
 		minimum_colour_column = colour_columns
 	end
 
+	-- If the user wants to always show the colour column,
+	-- then show the colour column and exit the function
+	if config.always_show then
+		return show_colour_columns(colour_columns, current_window)
+	end
+
 	-- Get whether the line length has exceeded the colour column
 	local exceeded = has_exceeded_colour_column(
 		current_buffer,
@@ -343,36 +381,13 @@ local function on_change()
 		minimum_colour_column
 	)
 
-	-- If the line length has exceeded the colour column
-	if exceeded then
-		--
+	-- If the line length has not exceeded the colour column,
+	-- then disable the colour column and exit the function
+	if not exceeded then return disable_colour_column(current_window) end
 
-		-- Transform the colour columns with the function to transform them
-		colour_columns = config.transform_colour_column(colour_columns)
-
-		-- If the colour column is a table,
-		-- iterate over all the columns,
-		-- convert them to a string
-		-- and join them with a comma,
-		-- and set the colour column to the result
-		if type(colour_columns) == "table" then
-			vim.wo[current_window].colorcolumn = table.concat(
-				vim.tbl_map(
-					function(column) return tostring(column) end,
-					colour_columns
-				),
-				","
-			)
-
-		-- Otherwise, set the colour column to given colour column as a string
-		else
-			vim.wo[current_window].colorcolumn = tostring(colour_columns)
-		end
-
-	-- Otherwise, disable the colour column
-	else
-		disable_colour_column(current_window)
-	end
+	-- Otherwise, the line length has exceeded the colour column,
+	-- so show the colour column
+	show_colour_columns(colour_columns, current_window)
 end
 
 -- The function to enable the plugin
