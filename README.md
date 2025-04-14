@@ -77,7 +77,7 @@ The `colour_column` can be an integer or a list of integers.
 For example:
 
 ```lua
----@type NerdColumn.ColourColumn
+---@type integer|integer[]
 colour_column = 80
 colour_column = { 80, 120 }
 ```
@@ -93,12 +93,17 @@ and returns an integer or a list of integers.
 For example:
 
 ```lua
----@type NerdColumn.CustomColourColumn
+---@type integer|integer[]
 custom_colour_column = {
     lua = { 80, 120 },
     markdown = 100,
 }
 
+---@type fun(
+---    buffer: integer,
+---    window: integer,
+---    file_type: string,
+---): integer|integer[]
 custom_colour_column = function(buffer, window, file_type)
     return 120
 end
@@ -117,7 +122,7 @@ It can be either `file`, `window`, or `line`.
 For example:
 
 ```lua
----@type NerdColumn.Scope
+---@type "file"|"window"|"line"
 scope = "window"
 ```
 
@@ -151,6 +156,11 @@ enabled = true
 
 The `always_show` option sets whether the plugin should
 always show the colour column.
+
+However, your `disabled_file_types` configuration will be respected
+when `always_show` is set to `true`,
+which means the colour column will not show on buffers with file types
+inside the `disabled_file_types` list when `always_show` is set to `true`.
 
 For example:
 
@@ -186,7 +196,7 @@ the line length is past `80`, but you want the colour column to show up at
 column `81`, you can use the function below to achieve that:
 
 ```lua
----@type NerdColumn.TransformColourColumn
+---@type fun(colour_column: integer|integer[]): integer|integer[]
 transform_colour_column = function(colour_column)
     return colour_column + 1
 end
@@ -201,7 +211,7 @@ colour columns, make sure you handle them in the `transform_colour_column`
 function, like shown below, or you will break the plugin.
 
 ```lua
----@type NerdColumn.TransformColourColumn
+---@type fun(colour_column: integer|integer[]): integer|integer[]
 transform_colour_column = function(colour_column)
     if type(colour_column) == "table" then
         return vim.tbl_map(function(item) return item + 1 end, colour_column)
