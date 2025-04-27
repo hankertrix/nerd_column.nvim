@@ -51,6 +51,7 @@ M.Scope = {
 }
 
 -- The default configuration
+---@type NerdColumn.Config
 M.default_config = {
 	colour_column = 80,
 
