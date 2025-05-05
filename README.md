@@ -33,7 +33,7 @@ Below is a video demonstration of the plugin in action.
 ```lua
 {
     "hankertrix/nerd_column.nvim",
-    event = { "BufEnter" },
+    event = "BufEnter",
     opts = {}
 }
 ```
