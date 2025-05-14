@@ -91,14 +91,12 @@ M.default_config = {
 		"zsh",
 		"typr",
 		"typrstats",
-		"snacks_terminal",
-		"Tybr",
-		"TybrStats",
 		"Trouble",
 		"NvimTree",
 		"WhichKey",
 		"Telescope*",
 		"Neogit*",
+		"snacks_*",
 	},
 }
 
