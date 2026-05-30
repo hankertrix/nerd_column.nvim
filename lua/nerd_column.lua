@@ -110,7 +110,6 @@ local config = M.default_config
 ---@param buffer integer The ID of the buffer to check
 ---@return boolean exceeded Whether the colour column has been exceeded
 local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
-	--
 
 	-- Initialise the scope
 	local scope = config.scope
@@ -131,7 +130,6 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 
 	-- Get the line if the scope is a line
 	if scope == "line" then
-		--
 
 		-- Get the current line
 		local current_line = vim.fn.line(".", window)
@@ -146,7 +144,6 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 
 	-- Otherwise, if the scope is the window
 	elseif scope == "window" then
-		--
 
 		-- Get the line range for the visible region
 		-- of the window being shown
@@ -165,7 +162,6 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 
 	-- Iterate over the lines
 	for _, line in ipairs(lines) do
-		--
 
 		-- Get the display width of the line
 		local display_width = vim.fn.strdisplaywidth(line, 0)
@@ -195,11 +191,9 @@ end
 ---@param list_of_file_types string[] The list of file types to check against
 ---@return boolean matched Whether the file type is in the list of file types
 local function match_file_type(given_file_type, list_of_file_types)
-	--
 
 	-- Iterate over the list of file types
 	for _, file_type in ipairs(list_of_file_types) do
-		--
 
 		-- Create the Lua pattern to match the file type
 		local pattern = string.format(
@@ -222,7 +216,6 @@ end
 -- The function to get whether the plugin is enabled or not
 ---@return boolean nerd_column_is_enabled Whether the plugin is enabled or not
 local function nerd_column_is_enabled()
-	--
 
 	-- Get the value of buffer local variable for
 	-- whether the plugin is enabled
@@ -237,15 +230,28 @@ local function nerd_column_is_enabled()
 end
 
 -- The function to set the plugin state
----@param state boolean
+---@param state boolean The plugin state
+---@param global boolean Whether to set the plugin state globally or not
 ---@return nil
-local function set_nerd_column_state(state)
-	--
+local function set_nerd_column_state(state, global)
 
 	-- Set the plugin state in both the global variable
 	-- and the buffer local variable
 	vim.g.nerd_column_enabled = state
 	vim.b.nerd_column_enabled = state
+
+	-- If the plugin state is not to be set globally,
+	-- exit the function
+	if not global then return end
+
+	-- Otherwise, iterate over the buffers and set the plugin state
+	for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+
+		-- If the buffer is listed, then set the buffer state
+		if vim.api.nvim_buf_is_loaded(buffer) then
+			vim.b[buffer].nerd_column_enabled = state
+		end
+	end
 end
 
 -- The function to disable the colour column
@@ -258,7 +264,6 @@ local function disable_colour_column(window) vim.wo[window].colorcolumn = "" end
 ---@param window integer
 ---@return nil
 local function show_colour_columns(colour_columns, window)
-	--
 
 	-- Transform the colour columns with the function to transform them
 	colour_columns = config.transform_colour_column(colour_columns)
@@ -284,8 +289,7 @@ local function show_colour_columns(colour_columns, window)
 end
 
 -- The function to call every time the buffer is updated
-local function on_change()
-	--
+function M.on_change()
 
 	-- Get the current window
 	local current_window = vim.api.nvim_get_current_win()
@@ -345,7 +349,6 @@ local function on_change()
 
 	-- If the colour columns is a table
 	if type(colour_columns) == "table" then
-		--
 
 		-- Initialise the minimum colour column to the first
 		-- item in the table
@@ -353,7 +356,6 @@ local function on_change()
 
 		-- Iterate over the colour columns in the table
 		for _, colour_column in ipairs(colour_columns) do
-			--
 
 			-- Get the minimum of the current minimum colour column
 			-- and the current colour column
@@ -390,45 +392,43 @@ local function on_change()
 end
 
 -- The function to enable the plugin
----@type fun(): nil
-M.enable = function()
-	--
+---@type fun(global: boolean): nil
+M.enable = function(global)
 
 	-- Enable the plugin
-	set_nerd_column_state(true)
+	set_nerd_column_state(true, global)
 
 	-- Call the on change function
-	on_change()
+	M.on_change()
 end
 
 -- The function to disable the plugin
-M.disable = function()
-	--
+---@type fun(global: boolean): nil
+M.disable = function(global)
 
 	-- Disable the plugin
-	set_nerd_column_state(false)
+	set_nerd_column_state(false, global)
 
 	-- Disable the colour column
 	disable_colour_column(vim.api.nvim_get_current_win())
 end
 
 -- The function to toggle the plugin
-M.toggle = function()
-	--
+---@type fun(global: boolean): nil
+M.toggle = function(global)
 
 	-- Get the current state of the plugin
 	local is_enabled = nerd_column_is_enabled()
 
 	-- Toggle the plugin
-	set_nerd_column_state(not is_enabled)
+	set_nerd_column_state(not is_enabled, global)
 
 	-- Call the on change function
-	on_change()
+	M.on_change()
 end
 
 -- The function to set up the plugin
 M.setup = function(user_config)
-	--
 
 	-- Initialise the user configuration to an empty table
 	-- if it isn't given
@@ -446,7 +446,7 @@ M.setup = function(user_config)
 		{ "BufEnter", "CursorMoved", "CursorMovedI", "WinScrolled" },
 		{
 			group = vim.api.nvim_create_augroup("NerdColumn", { clear = true }),
-			callback = on_change,
+			callback = M.on_change,
 		}
 	)
 end
