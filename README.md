@@ -332,6 +332,8 @@ Nerd Column provides 3 commands:
   `vim.b.nerd_column_enabled` to `true`, as most users would
   expect the command to work globally.
 
+  You can also pass `true` to the function to enable the plugin in all buffers.
+
 - `NerdColumnDisable` to disable the plugin.
   It can also be accessed from Lua by using:
 
@@ -342,6 +344,8 @@ Nerd Column provides 3 commands:
   This command will set both `vim.g.nerd_column_enabled` and
   `vim.b.nerd_column_enabled` to `false`, as most users would
   expect the command to work globally.
+
+  You can also pass `true` to the function to enable the plugin in all buffers.
 
 - `NerdColumnToggle` to toggle the plugin.
   It can also be accessed from Lua by using:
@@ -359,6 +363,8 @@ Nerd Column provides 3 commands:
   toggled state. The reason for this is that most users would expect
   the command to work globally, and that the toggle should act on
   the current state of the plugin in the current buffer.
+
+  You can also pass `true` to the function to enable the plugin in all buffers.
 
 ## [Licence]
 
