@@ -319,7 +319,7 @@ This way, you can disable the plugin in specific buffers by setting
 
 ## Commands
 
-Nerd Column provides 3 commands:
+Nerd Column provides 4 commands:
 
 - `NerdColumnEnable` to enable the plugin.
   It can also be accessed from Lua by using:
@@ -365,6 +365,21 @@ Nerd Column provides 3 commands:
   the current state of the plugin in the current buffer.
 
   You can also pass `true` to the function to enable the plugin in all buffers.
+
+- `NerdColumnReveal` to reveal the first location in the scope that exceeded
+  the minimum colour column.
+
+  It can also be accessed from Lua by using:
+
+  ```lua
+  require("nerd_column").reveal()
+  ```
+
+  The plugin saves the first location where the plugin exceeds the colour column
+  into `vim.b.nerd_column_exceeded_position`. It is set to `nil` if the
+  colour column has not been exceeded. Otherwise, you can get the line number
+  from `vim.b.nerd_column_exceeded_position.line` and the column number from
+  `vim.b.nerd_column_exceeded_position.column`.
 
 ## [Licence]
 

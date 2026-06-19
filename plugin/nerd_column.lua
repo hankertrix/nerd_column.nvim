@@ -20,3 +20,10 @@ vim.api.nvim_create_user_command(
 	function() require("nerd_column").toggle() end,
 	{}
 )
+
+-- The command to reveal the location that exceeds the colour column
+vim.api.nvim_create_user_command(
+	"NerdColumnReveal",
+	function() require("nerd_column").reveal() end,
+	{}
+)

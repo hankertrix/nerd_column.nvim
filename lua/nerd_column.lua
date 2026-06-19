@@ -108,7 +108,10 @@ local config = M.default_config
 -- has exceeded the colour columns
 ---@param window integer The ID of the window in the buffer
 ---@param buffer integer The ID of the buffer to check
+---@param minimum_colour_column integer The smallest colour column
 ---@return boolean exceeded Whether the colour column has been exceeded
+---@return integer? line_number Line that exceeded the colour column
+---@return integer? column_number Column that exceeded the colour column
 local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 
 	-- Initialise the scope
@@ -124,6 +127,9 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 		scope = M.Scope.Window
 	end
 
+	-- Get the line number at the start of the scope
+	local scope_start_line = 0
+
 	-- The list of lines
 	---@type string[]
 	local lines
@@ -134,10 +140,13 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 		-- Get the current line
 		local current_line = vim.fn.line(".", window)
 
+		-- Set the scope start line
+		scope_start_line = current_line - 1
+
 		-- Get the line range for the current line
 		lines = vim.api.nvim_buf_get_lines(
 			buffer,
-			current_line - 1,
+			scope_start_line,
 			current_line,
 			true
 		)
@@ -145,11 +154,14 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 	-- Otherwise, if the scope is the window
 	elseif scope == "window" then
 
+		-- Get the scope start line
+		scope_start_line = vim.fn.line("w0", window) - 1
+
 		-- Get the line range for the visible region
 		-- of the window being shown
 		lines = vim.api.nvim_buf_get_lines(
 			buffer,
-			vim.fn.line("w0", window) - 1,
+			scope_start_line,
 			vim.fn.line("w$", window),
 			true
 		)
@@ -161,14 +173,16 @@ local function has_exceeded_colour_column(buffer, window, minimum_colour_column)
 	end
 
 	-- Iterate over the lines
-	for _, line in ipairs(lines) do
+	for index, line in ipairs(lines) do
 
 		-- Get the display width of the line
 		local display_width = vim.fn.strdisplaywidth(line, 0)
 
 		-- If the display width exceeds the minimum colour column,
-		-- return true
-		if display_width > minimum_colour_column then return true end
+		-- return true, the line number of the line, and the display width
+		if display_width > minimum_colour_column then
+			return true, scope_start_line + index, minimum_colour_column
+		end
 	end
 
 	-- Otherwise, return false
@@ -257,7 +271,14 @@ end
 -- The function to disable the colour column
 ---@param window integer The ID of the window in the buffer
 ---@return nil
-local function disable_colour_column(window) vim.wo[window].colorcolumn = "" end
+local function disable_colour_column(window)
+
+	-- Disable the colour column
+	vim.wo[window].colorcolumn = ""
+
+	-- Reset the nerd column exceeded position
+	vim.b.nerd_column_exceeded_position = nil
+end
 
 -- The function to show the colour columns
 ---@param colour_columns integer|integer[]
@@ -286,6 +307,24 @@ local function show_colour_columns(colour_columns, window)
 	else
 		vim.wo[window].colorcolumn = tostring(colour_columns)
 	end
+end
+
+-- The function to get the minimum number from a list of numbers
+---@param numbers integer[] The list of numbers
+local function get_min_number(numbers)
+
+	-- Initialise the minimum number to the first number
+	local min_number = numbers[1]
+
+	-- Iterate over the numbers
+	for _, number in ipairs(numbers) do
+
+		-- Set the minimum number
+		min_number = math.min(min_number, number)
+	end
+
+	-- Return the minimum number
+	return min_number
 end
 
 -- The function to call every time the buffer is updated
@@ -344,24 +383,20 @@ function M.on_change()
 			get_editor_config_colour_column(current_buffer, colour_columns)
 	end
 
+	-- If the user wants to always show the colour column,
+	-- then show the colour column and exit the function
+	if config.always_show then
+		return show_colour_columns(colour_columns, current_window)
+	end
+
 	-- Initialise the minimum colour column
 	local minimum_colour_column
 
 	-- If the colour columns is a table
 	if type(colour_columns) == "table" then
 
-		-- Initialise the minimum colour column to the first
-		-- item in the table
-		minimum_colour_column = colour_columns[1]
-
-		-- Iterate over the colour columns in the table
-		for _, colour_column in ipairs(colour_columns) do
-
-			-- Get the minimum of the current minimum colour column
-			-- and the current colour column
-			minimum_colour_column =
-				math.min(minimum_colour_column, colour_column)
-		end
+		-- Get the minimum colour column
+		minimum_colour_column = get_min_number(colour_columns)
 
 	-- Otherwise, set the minimum colour column
 	-- to the colour column obtained
@@ -369,31 +404,31 @@ function M.on_change()
 		minimum_colour_column = colour_columns
 	end
 
-	-- If the user wants to always show the colour column,
-	-- then show the colour column and exit the function
-	if config.always_show then
-		return show_colour_columns(colour_columns, current_window)
-	end
-
 	-- Get whether the line length has exceeded the colour column
-	local exceeded = has_exceeded_colour_column(
+	local exceeded, line_number, column_number = has_exceeded_colour_column(
 		current_buffer,
 		current_window,
 		minimum_colour_column
 	)
 
-	-- If the line length has not exceeded the colour column,
-	-- then disable the colour column and exit the function
+	-- If the line length has not exceeded the colour column
+	-- disable the colour column and exit the function
 	if not exceeded then return disable_colour_column(current_window) end
 
 	-- Otherwise, the line length has exceeded the colour column,
-	-- so show the colour column
+	-- so store the exceeded position
+	vim.b.nerd_column_exceeded_position = {
+		line = line_number,
+		column = column_number,
+	}
+
+	-- Show the colour column
 	show_colour_columns(colour_columns, current_window)
 end
 
 -- The function to enable the plugin
----@type fun(global: boolean): nil
-M.enable = function(global)
+---@type fun(global: boolean?): nil
+function M.enable(global)
 
 	-- Enable the plugin
 	set_nerd_column_state(true, global)
@@ -403,8 +438,8 @@ M.enable = function(global)
 end
 
 -- The function to disable the plugin
----@type fun(global: boolean): nil
-M.disable = function(global)
+---@type fun(global: boolean?): nil
+function M.disable(global)
 
 	-- Disable the plugin
 	set_nerd_column_state(false, global)
@@ -414,8 +449,8 @@ M.disable = function(global)
 end
 
 -- The function to toggle the plugin
----@type fun(global: boolean): nil
-M.toggle = function(global)
+---@type fun(global: boolean?): nil
+function M.toggle(global)
 
 	-- Get the current state of the plugin
 	local is_enabled = nerd_column_is_enabled()
@@ -427,8 +462,25 @@ M.toggle = function(global)
 	M.on_change()
 end
 
+-- The function to reveal the first location that exceeds the colour column
+---@type fun(): nil
+function M.reveal()
+
+	-- Get the nerd column exceeded position
+	local exceeded_position = vim.b.nerd_column_exceeded_position
+
+	-- If it doesn't exist, exit the function
+	if not exceeded_position then return end
+
+	-- Reveal the first location that exceeds the colour column
+	vim.api.nvim_win_set_cursor(
+		0,
+		{ exceeded_position.line, exceeded_position.column }
+	)
+end
+
 -- The function to set up the plugin
-M.setup = function(user_config)
+function M.setup(user_config)
 
 	-- Initialise the user configuration to an empty table
 	-- if it isn't given
