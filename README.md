@@ -367,7 +367,7 @@ Nerd Column provides 4 commands:
   You can also pass `true` to the function to enable the plugin in all buffers.
 
 - `NerdColumnReveal` to reveal the first location in the scope that exceeded
-  the minimum colour column.
+  the minimum colour column by jumping the cursor to that position.
 
   It can also be accessed from Lua by using:
 
