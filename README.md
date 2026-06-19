@@ -38,6 +38,12 @@ Below is a video demonstration of the plugin in action.
 }
 ```
 
+### [vim.pack]
+
+```lua
+vim.pack.add({ "https://github.com/hankertrix/nerd_column.nvim" })
+```
+
 ### [pckr.nvim]
 
 ```lua
@@ -50,13 +56,13 @@ Below is a video demonstration of the plugin in action.
 ### [packer.nvim]
 
 ```lua
-use "hankertrix/nerd_column.nvim"
+use("hankertrix/nerd_column.nvim")
 ```
 
 ### [vim-plug]
 
 ```lua
-Plug "hankertrix/nerd_column.nvim"
+Plug("hankertrix/nerd_column.nvim")
 ```
 
 ## Setup
@@ -386,6 +392,7 @@ This plugin is licenced under the [GNU AGPL v3 licence][Licence].
 [video-demo]: https://github.com/user-attachments/assets/66a739ac-d3ba-43dc-b95b-a3778dcbd330
 [smartcolumn.nvim]: https://github.com/m4xshen/smartcolumn.nvim
 [lazy.nvim]: https://github.com/folke/lazy.nvim
+[vim.pack]: https://neovim.io/doc/user/pack/#_plugin-manager
 [packer.nvim]: https://github.com/wbthomason/packer.nvim
 [pckr.nvim]: https://github.com/lewis6991/pckr.nvim
 [vim-plug]: https://github.com/junegunn/vim-plug
