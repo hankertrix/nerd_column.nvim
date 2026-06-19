@@ -377,9 +377,9 @@ Nerd Column provides 4 commands:
 
   The plugin saves the first location where the plugin exceeds the colour column
   into `vim.b.nerd_column_exceeded_position`. It is set to `nil` if the
-  colour column has not been exceeded. Otherwise, you can get the line number
-  from `vim.b.nerd_column_exceeded_position.line` and the column number from
-  `vim.b.nerd_column_exceeded_position.column`.
+  colour column has not been exceeded or the plugin is disabled. Otherwise,
+  you can get the line number from `vim.b.nerd_column_exceeded_position.line`
+  and the column number from `vim.b.nerd_column_exceeded_position.column`.
 
 ## [Licence]
 
